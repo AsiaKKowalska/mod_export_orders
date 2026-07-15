@@ -11,7 +11,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class Mod_Export_Orders extends Module
+class Mod_export_orders extends Module
 {
     public function __construct()
     {
@@ -89,5 +89,11 @@ class Mod_Export_Orders extends Module
         Tools::redirectAdmin(
             $this->context->link->getAdminLink('AdminOrderExport')
         );
+    }
+}
+
+if (!class_exists('Mod_Export_Orders', false)) {
+    class Mod_Export_Orders extends Mod_export_orders
+    {
     }
 }
