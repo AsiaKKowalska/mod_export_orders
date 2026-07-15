@@ -1,10 +1,8 @@
 {*
  * views/admin/order_export_form.tpl
  * Smarty template for the order-export admin page.
+ * Standalone template – loaded via absolute _PS_MODULE_DIR_ path.
  *}
-{extends file='helpers/view/view.tpl'}
-
-{block name="override_tpl"}
 <div class="panel">
     <div class="panel-heading">
         <i class="icon-download"></i>
@@ -12,7 +10,7 @@
     </div>
 
     <div class="panel-body">
-        <form method="post" action="{$form_action|escape:'html':'UTF-8'}">
+        <form method="post" action="{$form_action|escape:'html':'UTF-8'}" class="form-horizontal">
 
             {* ── Status filter ───────────────────────────────────────── *}
             <div class="form-group">
@@ -70,4 +68,3 @@
         </small>
     </div>
 </div>{* /.panel *}
-{/block}

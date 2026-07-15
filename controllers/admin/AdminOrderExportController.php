@@ -54,7 +54,7 @@ class AdminOrderExportController extends ModuleAdminController
         ]);
 
         $this->setTemplate(
-            'module:mod_export_orders/views/admin/order_export_form.tpl'
+            _PS_MODULE_DIR_ . 'mod_export_orders/views/admin/order_export_form.tpl'
         );
     }
 
