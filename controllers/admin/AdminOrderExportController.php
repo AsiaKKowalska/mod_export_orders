@@ -53,9 +53,7 @@ class AdminOrderExportController extends ModuleAdminController
             'selected_product'=> (int) Tools::getValue('id_product', 0),
         ]);
 
-        $this->setTemplate(
-            _PS_MODULE_DIR_ . 'mod_export_orders/views/admin/order_export_form.tpl'
-        );
+        $this->setTemplate('order_export_form.tpl');
     }
 
     /**

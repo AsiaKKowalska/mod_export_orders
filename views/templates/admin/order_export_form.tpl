@@ -1,7 +1,6 @@
 {*
- * views/admin/order_export_form.tpl
+ * views/templates/admin/order_export_form.tpl
  * Smarty template for the order-export admin page.
- * Standalone template – loaded via absolute _PS_MODULE_DIR_ path.
  *}
 <div class="panel">
     <div class="panel-heading">
