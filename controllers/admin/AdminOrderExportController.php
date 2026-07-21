@@ -141,7 +141,7 @@ class AdminOrderExportController extends ModuleAdminController
     }
 
     /**
-     * Return available size attributes for the selected product.
+     * Return all non-colour variant attributes for the selected product.
      *
      * @param int $idProduct
      *
@@ -166,16 +166,8 @@ class AdminOrderExportController extends ModuleAdminController
                 ON (a.`id_attribute` = al.`id_attribute` AND al.`id_lang` = ' . $idLang . ')
             INNER JOIN `' . _DB_PREFIX_ . 'attribute_group` ag
                 ON a.`id_attribute_group` = ag.`id_attribute_group`
-            INNER JOIN `' . _DB_PREFIX_ . 'attribute_group_lang` agl
-                ON (ag.`id_attribute_group` = agl.`id_attribute_group` AND agl.`id_lang` = ' . $idLang . ')
             WHERE pa.`id_product` = ' . $idProduct . '
                 AND ag.`is_color_group` = 0
-                AND (
-                    LOWER(agl.`name`) LIKE \'rozmiar%\'
-                    OR LOWER(agl.`public_name`) LIKE \'rozmiar%\'
-                    OR LOWER(agl.`name`) LIKE \'size%\'
-                    OR LOWER(agl.`public_name`) LIKE \'size%\'
-                )
             ORDER BY al.`name` ASC
         ';
 

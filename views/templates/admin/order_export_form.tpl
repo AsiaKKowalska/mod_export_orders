@@ -9,7 +9,7 @@
     </div>
 
     <div class="panel-body">
-        <form method="post" action="{$form_action|escape:'html':'UTF-8'}" class="form-horizontal">
+        <form method="post" action="{$form_action|escape:'html':'UTF-8'}" class="form-horizontal" id="order-export-form">
 
             {* ── Status filter ───────────────────────────────────────── *}
             <div class="form-group">
@@ -35,7 +35,8 @@
                     {l s='Product' mod='mod_export_orders'}
                 </label>
                 <div class="col-lg-9">
-                    <select name="id_product" class="form-control">
+                    <select name="id_product" class="form-control"
+                            onchange="document.getElementById('order-export-form').submit()">
                         <option value="0">{l s='-- All products --' mod='mod_export_orders'}</option>
                         {foreach from=$products item=product}
                             <option value="{$product.id_product|intval}"
