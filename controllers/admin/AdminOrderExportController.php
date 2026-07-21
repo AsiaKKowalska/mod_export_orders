@@ -119,21 +119,25 @@ class AdminOrderExportController extends ModuleAdminController
     }
 
     /**
-     * Return a flat list of all active products (id + name).
+     * Return a flat list of all active products (id + name) for the current shop.
      *
      * @return array
      */
     private function getAllProducts()
     {
-        $idLang = (int) $this->context->language->id;
+        $idLang  = (int) $this->context->language->id;
+        $idShop  = (int) $this->context->shop->id;
         $sql = '
             SELECT p.`id_product`, pl.`name`
             FROM `' . _DB_PREFIX_ . 'product` p
-            LEFT JOIN `' . _DB_PREFIX_ . 'product_lang` pl
+            INNER JOIN `' . _DB_PREFIX_ . 'product_shop` ps
+                ON (p.`id_product` = ps.`id_product`
+                    AND ps.`id_shop` = ' . $idShop . '
+                    AND ps.`active` = 1)
+            INNER JOIN `' . _DB_PREFIX_ . 'product_lang` pl
                 ON (p.`id_product` = pl.`id_product`
-                    AND pl.`id_lang` = ' . $idLang . '
-                    AND pl.`id_shop` = ' . (int) $this->context->shop->id . ')
-            WHERE p.`active` = 1
+                    AND pl.`id_lang` = ' . $idLang . ')
+            GROUP BY p.`id_product`
             ORDER BY pl.`name` ASC
         ';
 
@@ -141,7 +145,8 @@ class AdminOrderExportController extends ModuleAdminController
     }
 
     /**
-     * Return all non-colour variant attributes for the selected product.
+     * Return all non-colour variant attributes for the selected product,
+     * scoped to the current shop.
      *
      * @param int $idProduct
      *
@@ -155,9 +160,13 @@ class AdminOrderExportController extends ModuleAdminController
         }
 
         $idLang = (int) $this->context->language->id;
+        $idShop = (int) $this->context->shop->id;
         $sql = '
             SELECT DISTINCT a.`id_attribute`, al.`name`
             FROM `' . _DB_PREFIX_ . 'product_attribute` pa
+            INNER JOIN `' . _DB_PREFIX_ . 'product_attribute_shop` pas
+                ON (pa.`id_product_attribute` = pas.`id_product_attribute`
+                    AND pas.`id_shop` = ' . $idShop . ')
             INNER JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac
                 ON pa.`id_product_attribute` = pac.`id_product_attribute`
             INNER JOIN `' . _DB_PREFIX_ . 'attribute` a
