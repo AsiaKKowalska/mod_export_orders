@@ -47,6 +47,33 @@
                 </div>
             </div>
 
+            {* ── Size filter (for selected product) ───────────────────── *}
+            <div class="form-group">
+                <label class="control-label col-lg-3">
+                    {l s='Size' mod='mod_export_orders'}
+                </label>
+                <div class="col-lg-9">
+                    <select name="id_attribute" class="form-control" {if !$selected_product}disabled="disabled"{/if}>
+                        {if !$selected_product}
+                            <option value="0">{l s='-- Select product first --' mod='mod_export_orders'}</option>
+                        {else}
+                            <option value="0">{l s='-- All sizes --' mod='mod_export_orders'}</option>
+                            {foreach from=$sizes item=size}
+                                <option value="{$size.id_attribute|intval}"
+                                    {if $selected_size == $size.id_attribute}selected="selected"{/if}>
+                                    {$size.name|escape:'html':'UTF-8'}
+                                </option>
+                            {/foreach}
+                        {/if}
+                    </select>
+                    {if $selected_product && !$sizes}
+                        <p class="help-block">
+                            {l s='No size attributes found for this product.' mod='mod_export_orders'}
+                        </p>
+                    {/if}
+                </div>
+            </div>
+
             {* ── Submit ──────────────────────────────────────────────── *}
             <div class="form-group">
                 <div class="col-lg-9 col-lg-offset-3">

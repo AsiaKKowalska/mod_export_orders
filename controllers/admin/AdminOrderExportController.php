@@ -44,13 +44,22 @@ class AdminOrderExportController extends ModuleAdminController
     {
         $orderStatuses = OrderState::getOrderStates($this->context->language->id);
         $products      = $this->getAllProducts();
+        $selectedProduct = (int) Tools::getValue('id_product', 0);
+        $sizes = $this->getProductSizes($selectedProduct);
+        $selectedSize = (int) Tools::getValue('id_attribute', 0);
+
+        if (!$this->isAttributeInList($sizes, $selectedSize)) {
+            $selectedSize = 0;
+        }
 
         $this->context->smarty->assign([
             'order_statuses'  => $orderStatuses,
             'products'        => $products,
             'form_action'     => $this->context->link->getAdminLink('AdminOrderExport'),
             'selected_status' => (int) Tools::getValue('id_order_state', 0),
-            'selected_product'=> (int) Tools::getValue('id_product', 0),
+            'selected_product'=> $selectedProduct,
+            'sizes'           => $sizes,
+            'selected_size'   => $selectedSize,
         ]);
 
         $this->setTemplate('order_export_form.tpl');
@@ -63,9 +72,14 @@ class AdminOrderExportController extends ModuleAdminController
     {
         $idOrderState = (int) Tools::getValue('id_order_state', 0);
         $idProduct    = (int) Tools::getValue('id_product', 0);
+        $idAttribute  = (int) Tools::getValue('id_attribute', 0);
+
+        if ($idProduct <= 0) {
+            $idAttribute = 0;
+        }
 
         $exporter = new OrderExporter();
-        $rows     = $exporter->getFilteredOrders($idOrderState, $idProduct);
+        $rows     = $exporter->getFilteredOrders($idOrderState, $idProduct, $idAttribute);
 
         $filename = 'orders_export_' . date('Ymd_His') . '.csv';
 
@@ -124,5 +138,73 @@ class AdminOrderExportController extends ModuleAdminController
         ';
 
         return Db::getInstance()->executeS($sql);
+    }
+
+    /**
+     * Return available size attributes for the selected product.
+     *
+     * @param int $idProduct
+     *
+     * @return array
+     */
+    private function getProductSizes($idProduct)
+    {
+        $idProduct = (int) $idProduct;
+        if ($idProduct <= 0) {
+            return [];
+        }
+
+        $idLang = (int) $this->context->language->id;
+        $sql = '
+            SELECT DISTINCT a.`id_attribute`, al.`name`
+            FROM `' . _DB_PREFIX_ . 'product_attribute` pa
+            INNER JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac
+                ON pa.`id_product_attribute` = pac.`id_product_attribute`
+            INNER JOIN `' . _DB_PREFIX_ . 'attribute` a
+                ON pac.`id_attribute` = a.`id_attribute`
+            INNER JOIN `' . _DB_PREFIX_ . 'attribute_lang` al
+                ON (a.`id_attribute` = al.`id_attribute` AND al.`id_lang` = ' . $idLang . ')
+            INNER JOIN `' . _DB_PREFIX_ . 'attribute_group` ag
+                ON a.`id_attribute_group` = ag.`id_attribute_group`
+            INNER JOIN `' . _DB_PREFIX_ . 'attribute_group_lang` agl
+                ON (ag.`id_attribute_group` = agl.`id_attribute_group` AND agl.`id_lang` = ' . $idLang . ')
+            WHERE pa.`id_product` = ' . $idProduct . '
+                AND ag.`is_color_group` = 0
+                AND (
+                    LOWER(agl.`name`) LIKE \'rozmiar%\'
+                    OR LOWER(agl.`public_name`) LIKE \'rozmiar%\'
+                    OR LOWER(agl.`name`) LIKE \'size%\'
+                    OR LOWER(agl.`public_name`) LIKE \'size%\'
+                )
+            ORDER BY al.`name` ASC
+        ';
+
+        $results = Db::getInstance()->executeS($sql);
+
+        return is_array($results) ? $results : [];
+    }
+
+    /**
+     * Validate whether attribute exists in available sizes list.
+     *
+     * @param array $sizes
+     * @param int $idAttribute
+     *
+     * @return bool
+     */
+    private function isAttributeInList(array $sizes, $idAttribute)
+    {
+        $idAttribute = (int) $idAttribute;
+        if ($idAttribute <= 0) {
+            return false;
+        }
+
+        foreach ($sizes as $size) {
+            if ((int) $size['id_attribute'] === $idAttribute) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

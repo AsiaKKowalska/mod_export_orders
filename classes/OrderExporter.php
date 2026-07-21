@@ -17,14 +17,16 @@ class OrderExporter
      *
      * @param int $idOrderState  0 = all statuses
      * @param int $idProduct     0 = all products
+     * @param int $idAttribute   0 = all sizes
      *
      * @return array  Each element contains: reference, firstname, lastname,
      *                phone, date_add, total_paid
      */
-    public function getFilteredOrders($idOrderState = 0, $idProduct = 0)
+    public function getFilteredOrders($idOrderState = 0, $idProduct = 0, $idAttribute = 0)
     {
         $idOrderState = (int) $idOrderState;
         $idProduct    = (int) $idProduct;
+        $idAttribute  = (int) $idAttribute;
 
         $sql = '
             SELECT DISTINCT
@@ -46,6 +48,14 @@ class OrderExporter
                 ON o.`id_order` = od.`id_order`
                 AND od.`product_id` = ' . $idProduct . '
             ';
+
+            if ($idAttribute > 0) {
+                $sql .= '
+                INNER JOIN `' . _DB_PREFIX_ . 'product_attribute_combination` pac
+                    ON od.`product_attribute_id` = pac.`id_product_attribute`
+                    AND pac.`id_attribute` = ' . $idAttribute . '
+                ';
+            }
         }
 
         $conditions = [];
